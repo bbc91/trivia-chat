@@ -12,8 +12,8 @@
     </div>
     <div v-else>
       <div id="messages-container" class="p-2">
-        <div class="message" v-for="(message, index) in messages" :key="index">
-          <strong v-if="message.user">{{ message.user }}:</strong>
+        <div class="message py-2 bg-gray-100 px-5 mb-2 shadow rounded-full" v-for="(message, index) in messages" :key="index">
+          <strong :class="{'text-pink-500' : message.user === 'You'}" v-if="message.user">{{ message.user }}:</strong>
           {{ message.text }}
         </div>
       </div>
