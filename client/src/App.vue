@@ -10,14 +10,26 @@
       />
       <button class="w-20 bg-orange-400" @click="joinChat()">Join</button>
     </div>
-    <div v-else>
-      <div id="messages-container" class="p-2">
-        <div class="message py-2 bg-gray-100 px-5 mb-2 shadow rounded-full" v-for="(message, index) in messages" :key="index">
-          <strong :class="{'text-pink-500' : message.user === 'You'}" v-if="message.user">{{ message.user }}:</strong>
+    <div v-else class="h-screen flex flex-col">
+      <div
+        id="messages-container"
+        class="flex-1 p-2 overflow-y-auto"
+        ref="messages"
+      >
+        <div
+          class="message py-2 bg-gray-100 px-5 mb-2 shadow rounded-full"
+          v-for="(message, index) in messages"
+          :key="index"
+        >
+          <strong
+            :class="{ 'text-pink-500': message.user === 'You' }"
+            v-if="message.user"
+            >{{ message.user }}:</strong
+          >
           {{ message.text }}
         </div>
       </div>
-      <div id="input-box" class="absolute bottom-0 flex p-2 w-full">
+      <div id="input-box" class="flex-shrink-0 flex p-2 w-full">
         <input
           v-model="message"
           @keyup.enter="sendMessage()"
@@ -43,7 +55,7 @@ export default {
       messages: [],
       message: "",
       userName: "",
-      joined: false,
+      joined: false
     };
   },
   methods: {
@@ -53,9 +65,16 @@ export default {
       }
       this.$socket.emit("new-user", this.userName);
       this.messages.push({
-        text: "You joined",
+        text: "You joined"
       });
       this.joined = true;
+    },
+    scollToBottom() {
+      this.$nextTick(() => {
+        this.$refs.messages.children[
+          this.$refs.messages.children.length - 1
+        ].scrollIntoView();
+      });
     },
     sendMessage() {
       if (!this.message.length) {
@@ -65,36 +84,40 @@ export default {
       this.$socket.emit("send-chat-message", this.message);
       this.messages.push({
         user: "You",
-        text: this.message,
+        text: this.message
       });
       this.message = "";
-    },
+      this.scollToBottom();
+    }
   },
   created() {
     let self = this;
 
-    this.sockets.subscribe("chat-message", function (msg) {
+    this.sockets.subscribe("chat-message", function(msg) {
       console.log(msg);
       self.messages.push({
         user: msg.name,
-        text: msg.message,
+        text: msg.message
       });
+      this.scollToBottom();
     });
 
-    this.sockets.subscribe("user-connected", function (name) {
+    this.sockets.subscribe("user-connected", function(name) {
       console.log(name);
       self.messages.push({
-        text: name + " joined",
+        text: name + " joined"
       });
+      this.scollToBottom();
     });
 
-    this.sockets.subscribe("user-disconnected", function (name) {
+    this.sockets.subscribe("user-disconnected", function(name) {
       console.log(name);
       self.messages.push({
-        text: name + " left",
+        text: name + " left"
       });
+      this.scollToBottom();
     });
-  },
+  }
 };
 </script>
 
@@ -104,23 +127,4 @@ export default {
 @import "tailwindcss/components";
 
 @import "tailwindcss/utilities";
-// #input-box {
-//   position: absolute;
-//   bottom: 0;
-//   width: 100%;
-//   max-width: 100%;
-//   margin: 0;
-//   padding: 0;
-//   display: flex;
-// }
-
-// #input-box input {
-//   width: 90%;
-// }
-
-// #input-box button {
-//   width: 10%;
-//   margin: 0;
-//   height: 30px;
-// }
 </style>
